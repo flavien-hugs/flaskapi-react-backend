@@ -51,7 +51,7 @@ class RecipeResource(Resource):
         recipe = Recipe.query.get_or_404(id)
         return recipe, 201
 
-    # @recipe_ns.expect(recipe_resource_fields)
+    @recipe_ns.expect(recipe_resource_fields)
     @recipe_ns.marshal_with(recipe_resource_fields, code=201)
     @jwt_required()
     def put(self, id):

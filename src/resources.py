@@ -27,6 +27,17 @@ login_resource_fields = api.model(
 )
 
 
+user_resource_fields = api.model(
+    "AuthSignup",
+    {
+        "id": fields.Integer(readonly=True, description="The recipe unique identifier"),
+        "user_fullname": fields.String(required=True, description="The user fullname"),
+        "user_addr_email": fields.String(
+            required=True, description="The user adresse email"
+        )
+    },
+)
+
 recipe_resource_fields = api.model(
     "Recipe",
     {

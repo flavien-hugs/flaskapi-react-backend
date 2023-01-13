@@ -1,11 +1,18 @@
 from flask import request
 from flask_restx import Namespace, Resource
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import(
+    jwt_required, get_jwt_identity,
+    create_access_token, create_refresh_token
+)
 
 from .. import api
 from ..models import User
-from ..resources import signup_resource_fields, login_resource_fields
+from ..resources import(
+    signup_resource_fields,
+    login_resource_fields,
+    user_resource_fields
+)
 
 auth_ns = api.namespace(
     'auth', version='1.0',
@@ -80,3 +87,27 @@ class AuthLogin(Resource):
             return {"user": data}, 200
 
         return {"message": "Wrong credentials"}, 401
+
+
+@auth_ns.route("/refresh", strict_slashes=False)
+class RefreshResource(Resource):
+    @jwt_required(refresh=True)
+    def post(self):
+        current_user = get_jwt_identity()
+        new_access_token = create_access_token(identity=current_user)
+        data = {
+            "access_token": new_access_token,
+            "user": current_user
+        }
+        return data, 200
+
+
+@auth_ns.route("/me", strict_slashes=False)
+class AuthUser(Resource):
+    """Show a single user item and lets you delete them"""
+    @auth_ns.expect(user_resource_fields)
+    @auth_ns.doc(body=user_resource_fields)
+    @jwt_required()
+    def get(self):
+        user_id = get_jwt_identity()
+        return {"user": user_id}, 200
