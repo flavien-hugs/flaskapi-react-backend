@@ -81,9 +81,9 @@ class AuthLogin(Resource):
                 "user_email": db_user.user_addr_email,
             }
 
-            return data, 200
+            return {"user": data}, 200
 
-        return jsonify({"message": "Wrong credentials"}), 401
+        return {"message": "Wrong credentials"}, 401
 
 
 @ns.route("/recipes", endpoint='recipes')
