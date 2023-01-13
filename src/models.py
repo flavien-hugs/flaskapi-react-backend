@@ -19,12 +19,18 @@ class Updateable:
             setattr(self, attr, value)
 
 
-class Recipe(Updateable, db.Model):
+class ModelAbstract(object):
+    rcp_created = db.Column(db.DateTime, default=datetime.utcnow())
+    rcp_updated = db.Column(db.DateTime, onupdate=datetime.utcnow())
+
+
+class Recipe(Updateable, db.Model, ModelAbstract):
+
+    __tablename__ = 'recipe'
+
     id = db.Column(db.Integer, primary_key=True, index=True)
     rcp_title = db.Column(db.String(80), nullable=False)
     rcp_desc = db.Column(db.Text(), nullable=False)
-    rcp_created = db.Column(db.DateTime, default=datetime.utcnow())
-    rcp_updated = db.Column(db.DateTime, onupdate=datetime.utcnow())
 
     def __repr__(self):
         return f"<Recipe self.rcp_title>"
@@ -54,13 +60,14 @@ class User:
 """
 
 
-class User(Updateable, db.Model):
+class User(Updateable, db.Model, ModelAbstract):
+
+    __tablename__ = 'user'
+
     id = db.Column(db.Integer, primary_key=True, index=True)
     user_fullname = db.Column(db.String(100), nullable=False)
     user_addr_email = db.Column(db.String(80), unique=True, nullable=False)
     user_password = db.Column(db.Text(), nullable=False)
-    rcp_created = db.Column(db.DateTime, default=datetime.utcnow())
-    rcp_updated = db.Column(db.DateTime, onupdate=datetime.utcnow())
 
     def __repr__(self):
         return f"<User self.user_fullname>"
