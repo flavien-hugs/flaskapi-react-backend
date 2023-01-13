@@ -27,6 +27,7 @@ def create_app(config_name):
     with app.app_context():
 
         from .routes import ns
+        # app.register_blueprint(ns)
 
         if not app.debug:
             if not os.path.exists("logs"):
