@@ -33,10 +33,11 @@ class Recipe(Updateable, db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
     def update(self, rcp_title, rcp_desc):
         self.rcp_title = rcp_title
         self.rcp_desc = rcp_desc
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()

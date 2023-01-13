@@ -2,6 +2,7 @@ import os
 import logging as lg
 
 from src import create_app, db
+from src.models import Recipe
 
 from dotenv import load_dotenv
 from flask_migrate import Migrate, upgrade
@@ -17,11 +18,11 @@ migrate = Migrate(app, db, render_as_batch=True)
 
 @app.shell_context_processor
 def make_shell_context():
-    return dict(db=db)
+    return dict(db=db, Recipe=Recipe,)
 
 
-@app.cli.command()
-def deploy():
+@app.cli.command("init_db")
+def init_db():
     upgrade()
     db.create_all()
     db.session.commit()

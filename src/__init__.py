@@ -5,12 +5,14 @@ from logging.handlers import RotatingFileHandler
 from flask import Flask, render_template
 
 from flask_restx import Api
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 from config import config
 
 db = SQLAlchemy()
-api = Api(version="1.0", title="TodoMVC API", description="A simple TodoMVC API")
+migrate = Migrate()
+api = Api(version="1.0", title="RecipeMVC API", description="A RecipeMVC API")
 
 
 def create_app(config_name):
@@ -19,6 +21,7 @@ def create_app(config_name):
     config[config_name].init_app(app)
 
     api.init_app(app)
+    migrate.init_app(app, db)
     db.init_app(app)
 
     with app.app_context():
