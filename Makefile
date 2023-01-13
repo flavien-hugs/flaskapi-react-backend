@@ -1,4 +1,4 @@
-MANAGE := FLASK_APP=run.py
+MANAGE := FLASK_APP=main.py
 
 
 .PHONY: help
@@ -15,9 +15,6 @@ install: venv ## Install or update dependencies
 
 freeze: ## Pin current dependencies
 	pipenv requirements > requirements.txt
-
-test: ## Run the unit tests
-	$(MANAGE) flask test
 
 createdb: ## Create database
 	$(MANAGE) flask init_db
