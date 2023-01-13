@@ -26,14 +26,14 @@ class ModelAbstract(object):
 
 class Recipe(Updateable, db.Model, ModelAbstract):
 
-    __tablename__ = 'recipe'
+    __tablename__ = "recipe"
 
     id = db.Column(db.Integer, primary_key=True, index=True)
     rcp_title = db.Column(db.String(80), nullable=False)
     rcp_desc = db.Column(db.Text(), nullable=False)
 
     def __repr__(self):
-        return f"<Recipe self.rcp_title>"
+        return f"<Recipe {self.rcp_title}>"
 
     def save(self):
         db.session.add(self)
@@ -62,7 +62,7 @@ class User:
 
 class User(Updateable, db.Model, ModelAbstract):
 
-    __tablename__ = 'user'
+    __tablename__ = "user"
 
     id = db.Column(db.Integer, primary_key=True, index=True)
     user_fullname = db.Column(db.String(100), nullable=False)
@@ -70,7 +70,7 @@ class User(Updateable, db.Model, ModelAbstract):
     user_password = db.Column(db.Text(), nullable=False)
 
     def __repr__(self):
-        return f"<User self.user_fullname>"
+        return f"<User {self.user_fullname}>"
 
     def save(self):
         db.session.add(self)
