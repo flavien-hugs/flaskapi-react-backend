@@ -145,3 +145,4 @@ alchemydumps-backup/*.gz
 upload/*
 migrations
 alchemydumps/
+fixtures/
