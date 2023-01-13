@@ -5,6 +5,7 @@ from logging.handlers import RotatingFileHandler
 from flask import Flask, render_template
 
 from flask_restx import Api
+from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
@@ -12,6 +13,7 @@ from flask_jwt_extended import JWTManager
 from config import config
 
 db = SQLAlchemy()
+cors = CORS()
 migrate = Migrate()
 jwt = JWTManager()
 api = Api(version="1.0", title="RecipeMVC API", description="A RecipeMVC API")
@@ -22,6 +24,7 @@ def create_app(config_name):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
+    cors.init_app(app)
     jwt.init_app(app)
     api.init_app(app)
     migrate.init_app(app, db)
