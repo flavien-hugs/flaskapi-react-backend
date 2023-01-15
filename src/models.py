@@ -74,7 +74,9 @@ class Recipe(Updateable, db.Model, ModelAbstract):
     id = db.Column(db.Integer, primary_key=True, index=True)
     rcp_title = db.Column(db.String(80), nullable=False)
     rcp_desc = db.Column(db.Text(), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), index=True, nullable=False)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id"), index=True, nullable=False
+    )
 
     def __repr__(self):
         return f"<Recipe {self.rcp_title}>"

@@ -2,7 +2,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
-from flask import Flask, request, render_template
+from flask import Flask, request
 
 from flask_restx import Api
 from flask_cors import CORS
@@ -19,8 +19,10 @@ jwt = JWTManager()
 
 authorizations = {"Bearer": {"type": "apiKey", "in": "header", "name": "Authorization"}}
 api = Api(
-    version="1.0", title="RecipeMVC API",
-    description="A RecipeMVC API", authorizations=authorizations
+    version="1.0",
+    title="RecipeMVC API",
+    description="A RecipeMVC API",
+    authorizations=authorizations,
 )
 
 
@@ -37,7 +39,7 @@ def create_app(config_name):
 
     with app.app_context():
 
-        from .routes import auth, recipe
+        from .routes import auth, recipe  # noqa
 
         if not app.debug:
             if not os.path.exists("logs"):

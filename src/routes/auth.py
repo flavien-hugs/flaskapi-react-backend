@@ -3,22 +3,23 @@ from http import HTTPStatus
 from flask import request, jsonify
 from flask_restx import Resource, representations
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import(
-    jwt_required, get_jwt_identity,
-    create_access_token, create_refresh_token
+from flask_jwt_extended import (
+    jwt_required,
+    get_jwt_identity,
+    create_access_token,
+    create_refresh_token,
 )
 
 from .. import api
 from ..models import User, Recipe
-from ..resources import(
+from ..resources import (
     signup_resource_fields,
     login_resource_fields,
-    user_resource_fields
+    user_resource_fields,
 )
 
 auth_ns = api.namespace(
-    'auth', version='1.0',
-    description="A namespace for our authentication"
+    "auth", version="1.0", description="A namespace for our authentication"
 )
 
 
@@ -38,26 +39,31 @@ class AuthSignup(Resource):
         """Register a new user and return an user"""
         data = request.json
         fullname = data["user_fullname"]
-        addr_email = data['user_addr_email']
-        password = data['user_password']
+        addr_email = data["user_addr_email"]
+        password = data["user_password"]
 
         if len(password) < PASSWORD_LENGTH:
-            return jsonify({"message": "Password is too short"}), HTTP_400_BAD_REQUEST
+            return jsonify({"message": "Password is too short"}), HTTPStatus.BAD_REQUEST
 
         if len(fullname) < FULLNAME_LENGTH:
-            return jsonify({"message": f"This user fullname '{fullname}' is too short"}), 400
+            return (
+                jsonify({"message": f"This user fullname '{fullname}' is too short"}),
+                400,
+            )
 
-        db_user = User.query.filter_by(
-            user_addr_email=addr_email).one_or_none()
+        db_user = User.query.filter_by(user_addr_email=addr_email).one_or_none()
         if db_user is not None:
-            return jsonify({"message": f"This address email '{addr_email}' is taken !"}), 409
+            return (
+                jsonify({"message": f"This address email '{addr_email}' is taken !"}),
+                409,
+            )
 
         password_hashed = generate_password_hash(password)
 
         new_user = User(
             user_fullname=fullname,
             user_addr_email=addr_email,
-            user_password=password_hashed
+            user_password=password_hashed,
         )
         new_user.save()
         return new_user
@@ -67,16 +73,13 @@ class AuthSignup(Resource):
 @auth_ns.response(int(HTTPStatus.OK), "User logged successfully")
 @auth_ns.response(int(HTTPStatus.UNAUTHORIZED), "User not found")
 class AuthLogin(Resource):
-
     @auth_ns.expect(login_resource_fields)
     def post(self):
         data = request.get_json()
         user_addr_email = data.get("user_addr_email", None)
         user_password = data.get("user_password", None)
 
-        db_user = User.query.filter_by(
-            user_addr_email=user_addr_email
-        ).one_or_none()
+        db_user = User.query.filter_by(user_addr_email=user_addr_email).one_or_none()
 
         if db_user and check_password_hash(db_user.user_password, user_password):
             refresh_token = create_refresh_token(identity=db_user.id)
@@ -101,10 +104,7 @@ class RefreshResource(Resource):
     def post(self):
         current_user = get_jwt_identity()
         new_access_token = create_access_token(identity=current_user)
-        data = {
-            "access_token": new_access_token,
-            "user": current_user
-        }
+        data = {"access_token": new_access_token, "user": current_user}
         return data, 200
 
 
@@ -127,19 +127,18 @@ class AuthUser(Resource):
     @auth_ns.marshal_with(user_resource_fields, code=201)
     @jwt_required()
     def put(self):
-        '''Update a user given its identifier'''
+        """Update a user given its identifier"""
         data = request.json
         current_user = get_jwt_identity()
         user = User.query.get_or_404(current_user)
-        user.update(data['user_fullname'], data['user_addr_email'])
+        user.update(data["user_fullname"], data["user_addr_email"])
         return user, 201
 
     @auth_ns.expect(user_resource_fields)
     @auth_ns.marshal_with(user_resource_fields, code=201)
     @jwt_required()
     def delete(self):
-        '''Delete a user given its identifier'''
-        data = request.json
+        """Delete a user given its identifier"""
         current_user = get_jwt_identity()
         user = User.query.get_or_404(current_user)
         user.delete()

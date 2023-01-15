@@ -32,8 +32,8 @@ user_resource_fields = api.model(
         "id": fields.Integer(readonly=True, description="The recipe unique identifier"),
         "user_fullname": fields.String(required=True, description="The user fullname"),
         "user_addr_email": fields.String(
-            required=True, type=inputs.email,  description="The user adresse email"
-        )
+            required=True, type=inputs.email, description="The user adresse email"
+        ),
     },
 )
 
