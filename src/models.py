@@ -37,9 +37,6 @@ class User(Updateable, db.Model, ModelAbstract):
     user_password = db.Column(db.Text(), nullable=False)
     recipes = db.relationship("Recipe", backref="user", lazy="dynamic")
 
-    def recipes_select(self):
-        return Recipe.select().where(orm.with_parent(self, User.recipes))
-
     def __repr__(self):
         return f"<User {self.user_fullname}>"
 
@@ -56,6 +53,8 @@ class User(Updateable, db.Model, ModelAbstract):
         db.session.delete(self)
         db.session.commit()
 
+    def recipes_select(self):
+        return Recipe.select().where(orm.with_parent(self, User.recipes))
 
 
 """
@@ -76,7 +75,6 @@ class Recipe(Updateable, db.Model, ModelAbstract):
     rcp_title = db.Column(db.String(80), nullable=False)
     rcp_desc = db.Column(db.Text(), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), index=True, nullable=False)
-    author = orm.relationship('User', back_populates='recipes')
 
     def __repr__(self):
         return f"<Recipe {self.rcp_title}>"
