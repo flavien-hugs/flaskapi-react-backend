@@ -1,4 +1,4 @@
-from flask_restx import fields
+from flask_restx import fields, inputs
 
 from . import api
 
@@ -6,10 +6,9 @@ from . import api
 signup_resource_fields = api.model(
     "AuthSignup",
     {
-        "id": fields.Integer(readonly=True, description="The recipe unique identifier"),
         "user_fullname": fields.String(required=True, description="The user fullname"),
         "user_addr_email": fields.String(
-            required=True, description="The user adresse email"
+            required=True, type=inputs.email, description="The user adresse email"
         ),
         "user_password": fields.String(required=True, description="The user password"),
     },
@@ -20,7 +19,7 @@ login_resource_fields = api.model(
     "AuthLogin",
     {
         "user_addr_email": fields.String(
-            required=True, description="The user adresse email"
+            required=True, type=inputs.email, description="The user adresse email"
         ),
         "user_password": fields.String(required=True, description="The user password"),
     },
@@ -28,12 +27,12 @@ login_resource_fields = api.model(
 
 
 user_resource_fields = api.model(
-    "AuthSignup",
+    "User",
     {
         "id": fields.Integer(readonly=True, description="The recipe unique identifier"),
         "user_fullname": fields.String(required=True, description="The user fullname"),
         "user_addr_email": fields.String(
-            required=True, description="The user adresse email"
+            required=True, type=inputs.email,  description="The user adresse email"
         )
     },
 )
