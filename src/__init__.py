@@ -2,7 +2,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
-from flask import Flask, render_template
+from flask import Flask, request, render_template
 
 from flask_restx import Api
 from flask_cors import CORS
@@ -16,7 +16,12 @@ db = SQLAlchemy()
 cors = CORS()
 migrate = Migrate()
 jwt = JWTManager()
-api = Api(version="1.0", title="RecipeMVC API", description="A RecipeMVC API")
+
+authorizations = {"Bearer": {"type": "apiKey", "in": "header", "name": "Authorization"}}
+api = Api(
+    version="1.0", title="RecipeMVC API",
+    description="A RecipeMVC API", authorizations=authorizations
+)
 
 
 def create_app(config_name):
@@ -50,5 +55,10 @@ def create_app(config_name):
             app.logger.addHandler(file_handler)
             app.logger.setLevel(logging.INFO)
             app.logger.info("running app")
+
+        @app.after_request
+        def after_request(response):
+            request.get_data()
+            return response
 
         return app
