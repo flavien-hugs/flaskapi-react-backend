@@ -1,4 +1,4 @@
-MANAGE := FLASK_APP=main.py
+MANAGE := FLASK_APP=run.py
 
 
 .PHONY: help
