@@ -1,5 +1,7 @@
-from flask import request
-from flask_restx import Namespace, Resource
+from http import HTTPStatus
+
+from flask import request, jsonify
+from flask_restx import Resource, representations
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import(
     jwt_required, get_jwt_identity,
@@ -7,7 +9,7 @@ from flask_jwt_extended import(
 )
 
 from .. import api
-from ..models import User
+from ..models import User, Recipe
 from ..resources import(
     signup_resource_fields,
     login_resource_fields,
@@ -26,11 +28,14 @@ FULLNAME_LENGTH = 4
 
 @auth_ns.route("/signup", strict_slashes=False)
 class AuthSignup(Resource):
-
+    @auth_ns.response(int(HTTPStatus.CREATED), "New user was successfully created.")
+    @auth_ns.response(int(HTTPStatus.CONFLICT), "Email address is already registered.")
+    @auth_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
+    @auth_ns.response(int(HTTPStatus.INTERNAL_SERVER_ERROR), "Internal server error.")
     @auth_ns.expect(signup_resource_fields)
-    @auth_ns.marshal_with(signup_resource_fields, code=201)
+    @auth_ns.doc(body=signup_resource_fields)
     def post(self):
-        """Create a new user"""
+        """Register a new user and return an user"""
         data = request.json
         fullname = data["user_fullname"]
         addr_email = data['user_addr_email']
@@ -55,10 +60,12 @@ class AuthSignup(Resource):
             user_password=password_hashed
         )
         new_user.save()
-        return new_user, 201
+        return new_user
 
 
 @auth_ns.route("/login", strict_slashes=False)
+@auth_ns.response(int(HTTPStatus.OK), "User logged successfully")
+@auth_ns.response(int(HTTPStatus.UNAUTHORIZED), "User not found")
 class AuthLogin(Resource):
 
     @auth_ns.expect(login_resource_fields)
@@ -72,10 +79,8 @@ class AuthLogin(Resource):
         ).one_or_none()
 
         if db_user and check_password_hash(db_user.user_password, user_password):
-            refresh_token = create_refresh_token(
-                identity=db_user.user_addr_email)
-            access_token = create_access_token(
-                identity=db_user.user_addr_email)
+            refresh_token = create_refresh_token(identity=db_user.id)
+            access_token = create_access_token(identity=db_user.id)
 
             data = {
                 "refresh_token": refresh_token,
@@ -90,6 +95,7 @@ class AuthLogin(Resource):
 
 
 @auth_ns.route("/refresh", strict_slashes=False)
+@auth_ns.response(int(HTTPStatus.OK), "User logout successfully")
 class RefreshResource(Resource):
     @jwt_required(refresh=True)
     def post(self):
@@ -103,11 +109,38 @@ class RefreshResource(Resource):
 
 
 @auth_ns.route("/me", strict_slashes=False)
+@auth_ns.response(int(HTTPStatus.UNAUTHORIZED), "Unauthorized access")
 class AuthUser(Resource):
-    """Show a single user item and lets you delete them"""
+    """Show a user item and lets you delete them"""
+
     @auth_ns.expect(user_resource_fields)
     @auth_ns.doc(body=user_resource_fields)
     @jwt_required()
     def get(self):
-        user_id = get_jwt_identity()
-        return {"user": user_id}, 200
+        """Get a user"""
+        current_user = get_jwt_identity()
+        recipes = Recipe.query.filter_by(user_id=current_user).all()
+        print(representations.output_json(recipes, 4))
+        return {"user": current_user}
+
+    @auth_ns.expect(user_resource_fields)
+    @auth_ns.marshal_with(user_resource_fields, code=201)
+    @jwt_required()
+    def put(self):
+        '''Update a user given its identifier'''
+        data = request.json
+        current_user = get_jwt_identity()
+        user = User.query.get_or_404(current_user)
+        user.update(data['user_fullname'], data['user_addr_email'])
+        return user, 201
+
+    @auth_ns.expect(user_resource_fields)
+    @auth_ns.marshal_with(user_resource_fields, code=201)
+    @jwt_required()
+    def delete(self):
+        '''Delete a user given its identifier'''
+        data = request.json
+        current_user = get_jwt_identity()
+        user = User.query.get_or_404(current_user)
+        user.delete()
+        return user, 200
